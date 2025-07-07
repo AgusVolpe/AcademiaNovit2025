@@ -24,4 +24,6 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: cd AcademiaNovit.Tests/ && pwd && dotnet test --no-build --verbosity normal
+      run: |
+        set -e
+        cd src/AcademiaNovit.Tests/ && pwd && dotnet test --no-build --verbosity normal
