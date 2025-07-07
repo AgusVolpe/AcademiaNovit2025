@@ -2,9 +2,9 @@ name: GH-build-DEV
 
 on:
   push:
-    branches: [ "development", "uat", "production" ]
+    branches: [ "main", "development", "uat", "production" ]
   pull_request:
-    branches: [ "development", "uat", "production" ]
+    branches: [ "main", "development", "uat", "production" ]
 
 jobs:
   build:
