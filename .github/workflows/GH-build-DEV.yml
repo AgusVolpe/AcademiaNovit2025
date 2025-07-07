@@ -1,0 +1,27 @@
+name: GH-build-DEV
+
+on:
+  push:
+    branches: [ "development", "uat", "production" ]
+  pull_request:
+    branches: [ "development", "uat", "production" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test ./AcademiaNovit.Tests/AcademiaNovit.Tests.csproj --no-build --verbosity normal
