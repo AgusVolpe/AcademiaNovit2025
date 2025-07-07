@@ -1,0 +1,49 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: GH-SendEmail-DEV
+
+on:
+  push:
+    branches: [ "main", "development", "uat", "production" ]
+  pull_request:
+    branches: [ "main", "development", "uat", "production" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Send email
+      uses: dawidd6/action-send-mail@v6
+      with:
+        # Required mail server address if not connection_url:
+        server_address: ${{secrets.EMAIL_HOST}}
+        # Server port, default 25:
+        server_port: ${{secrets.EMAIL_PORT}}
+        # Optional (recommended) mail server username:
+        username: ${{secrets.EMAIL_USERNAME}}
+        # Optional (recommended) mail server password:
+        password: ${{secrets.EMAIL_PASSWORD}}
+        # Required mail subject:
+        subject: Github Actions job result positive
+        # Required recipients' addresses:
+        to: jonathan.velazquez@novit.com.ar, gustavo.venturo@novit.com.ar
+        # Required sender full name (address can be skipped):
+        from: agustin.volpe@novit.com.ar # <user@example.com>
+        # Optional plain body:
+        body: Build job of ${{github.repository}} completed successfully!
