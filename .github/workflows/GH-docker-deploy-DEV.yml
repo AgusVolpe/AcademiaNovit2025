@@ -28,4 +28,4 @@ jobs:
         username: ${{ secrets.UBUNTU_SERVER_USERNAME }}
         key: ${{ secrets.UBUNTU_SERVER_KEY }}
         port: ${{ secrets.UBUNTU_SERVER_PORT }}
-        script: docker compose -f "docker-compose-deploy.yml" up -d
+        script: docker compose -f "AcademiaNovitSinSecrets/docker-compose-deploy.yml" up -d
