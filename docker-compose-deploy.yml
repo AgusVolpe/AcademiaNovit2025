@@ -1,0 +1,106 @@
+
+services:
+  portainer:
+    container_name: academia-portainer
+    image: portainer/portainer-ce:latest
+    ports:
+      - "9000:9000"
+    volumes:
+      - portainer-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - app-network
+    restart: always
+
+  nginx:
+    container_name: academia-nginx
+    image: nginx:alpine3.22
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  postgres:
+    container_name: academia-postgresDB
+    image: postgres:17.5
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: tivon1234
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgresql
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d datos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: academia-pgadminDB
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - app-network
+    restart: always
+    depends_on:
+      - postgres
+
+  webapp:
+    container_name: academia-webapp
+    image: ghcr.io/agusvolpe/academianovit:latest
+    pull_policy: always
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+     postgres:
+       condition: service_healthy
+     seq:
+       condition: service_started
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=datos;Username=admin;Password=tivon1234
+      - Serilog__WriteTo__1__Name=Seq
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+
+  seq:
+    container_name: acedemia-seq
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINUSERNAME=admin
+      - SEQ_FIRSTRUN_ADMINPASSWORD=tivon1234
+    ports:
+      - "5353:80"
+      - "5342:5341"
+    volumes:
+      - seq-data:/data
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+    postgres:
+    pgadmin:
+    seq-data:
+    portainer-data:

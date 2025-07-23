@@ -22,8 +22,23 @@ builder.Configuration.AddEnvironmentVariables();
 
 #endregion
 
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+string connectionString;
+var secretFilePath = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING_FILE");
+
+if (!string.IsNullOrEmpty(secretFilePath) && File.Exists(secretFilePath))
+{
+    // Leer desde Docker secret
+    connectionString = File.ReadAllText(secretFilePath).Trim();
+    Log.Information("Connection string loaded from Docker secret");
+}
+else
+{
+    // Fallback a appsettings.json (desarrollo local)
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    Log.Information("Connection string loaded from appsettings.json (local development)");
+}
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
@@ -56,4 +71,4 @@ app.MapGet("/keep-alive", () => new
 
 app.Run();
 
-public partial class Program { } // This partial class is required for the WebApplicationFactory to work properly in tests. 
+public partial class Program { } // This partial class is required for the WebApplicationFactory to work properly in tests.
