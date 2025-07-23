@@ -24,8 +24,8 @@ jobs:
     - name: Run docker-compose to Server
       uses: appleboy/ssh-action@v1
       with:
-        host: ${{ UBUNTU_SERVER_HOST }}
-        username: ${{ UBUNTU_SERVER_USERNAME }}
-        key: ${{ UBUNTU_SERVER_KEY }}
-        port: ${{ UBUNTU_SERVER_PORT }}
+        host: ${{ secrets.UBUNTU_SERVER_HOST }}
+        username: ${{ secrets.UBUNTU_SERVER_USERNAME }}
+        key: ${{ secrets.UBUNTU_SERVER_KEY }}
+        port: ${{ secrets.UBUNTU_SERVER_PORT }}
         script: docker compose -f "docker-compose-deploy.yml" up -d
