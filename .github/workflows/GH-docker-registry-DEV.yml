@@ -1,0 +1,24 @@
+name: GH-docker-registry-DEV
+
+on:
+  push:
+    branches: [ "main", "development", "uat", "production" ]
+  pull_request:
+    branches: [ "main", "development", "uat", "production" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build docker image
+      run: docker build . --file Dockerfile --tag academianovit:latest
+    - name: Login Registry GitHub
+      run: docker login ghcr.io -u ${{ secrets.USERNAME_REGISTRY_GITHUB }} -p ${{ secrets.TOKEN_REGISTRY_GITHUB }}
+    - name: Retag Docker image for GitHub Registry
+      run: docker build . --file Dockerfile --tag ghcr.io/${{ secrets.USERNAME_REGISTRY_GITHUB }}/academianovit:latest
+    - name: Push docker image to GitHub Registry
+      run: docker push ghcr.io/${{ secrets.USERNAME_REGISTRY_GITHUB }}/academianovit:latest
+      

@@ -1,4 +1,4 @@
-name: GH-build-DEV
+name: GH-Send-Email-DEV
 
 on:
   push:
